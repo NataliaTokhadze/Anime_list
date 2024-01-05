@@ -2,8 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 import csv
 import os
+import lxml
 
-info = ["Name", "Studio", "Year", "Rate", "Episodes"]
+info = ["Name", "Year", "Rate", "Studio", "Episodes"]
 csvfile = open('movie_data.csv', 'w', newline='') 
 csvwriter = csv.writer(csvfile)
 csvwriter.writerow(column_name)
@@ -14,14 +15,26 @@ headers = {
 
 website = requests.get('https://anilist.co/search/anime?genres=Detective', headers=headers).text
 soup = BeautifulSoup(website, 'lxml')
-#animes = soup.find_all('li', class_= '<div data-v-219025ae class="results cover">grid')
+animes = soup.find_all('div', class_= "media-card")
 i = 0
 
 for anime in animes:
-    #name = anime.find('h3', class_= 'ipc-title__text').text.split('. ')[1:]
-    name = "{}".format(*name) 
+    name = anime.find('a', class_= 'title').text.split('. ')[1:]
+    name = "{}".format(*name)
+     
     
-#sadac weria "#" - davibeni da ar vici ra gavaketo
-#am etapze vsio
-#arc vici ra gavaketo
-#mishvelet!!!
+    movie_data = anime.find_all('div', class_='header')
+    year = movie_data[0].text
+    rating = movie_data[1].text
+    
+    studio = anime.find('div', class_='studios')
+    
+    information = anime.find('div', class_ = 'info')
+    episode = information[2].text 
+    
+    i += 1
+
+    csvwriter.writerow([i, name, year, rating, studio, episode])
+    
+print(f"Done writing {i} entries to the csv file!")
+csvfile.close()
